@@ -137,19 +137,16 @@ def delete_secret(file_path, secret_name):
             if line.split("=")[0].strip() == secret_name:
                 continue
             file.write(line)
-
 def encrypt_secrets(file_path, master_key_env, master_key=None):
     """
     Encrypt all secrets in the target file
     """
     if not master_key:
         master_key = os.getenv(master_key_env)
+    processed_secrets = set()
     with open(file_path, "r") as file:
         lines = file.readlines()
     with open(file_path, "w") as file:
-        #file.write(HEADER)    # Add the default comment block
-        #file.write("\n\n")
-        #file.write(f"MASTER_KEY_ENV = '{master_key_env}'\n")
         if lines[0].strip() != HEADER_DISCLAIMER:
             file.write(HEADER_DISCLAIMER + "\n")
         for line in lines:
@@ -160,9 +157,12 @@ def encrypt_secrets(file_path, master_key_env, master_key=None):
             secret_name = secret_name.strip()  # Remove starting or ending whitespaces
             secret_value = secret_value.strip().strip('"')
 
-            # If the secret_name is the master_key_env, write it to the file unchanged
-            if secret_name == "MASTER_KEY_ENV":
-                file.write(f'{secret_name} = "{secret_value}"\n')
+            # If the secret_name is the master_key_env or already encrypted, write it to the file unchanged
+            if secret_name == "MASTER_KEY_ENV" or secret_name.strip().endswith("_ENCRYPTED"):
+                if secret_name in processed_secrets:
+                    continue
+                processed_secrets.add(secret_name)
+                file.write(line)
                 continue
 
             # rest of the code
@@ -173,13 +173,45 @@ def encrypt_secrets(file_path, master_key_env, master_key=None):
                     f"{encrypted_value}{current_datetime}{master_key}".encode()
                 ).digest()
             ).decode()
+# def encrypt_secrets(file_path, master_key_env, master_key=None):
+#     """
+#     Encrypt all secrets in the target file
+#     """
+#     if not master_key:
+#         master_key = os.getenv(master_key_env)
+#     with open(file_path, "r") as file:
+#         lines = file.readlines()
+#     with open(file_path, "w") as file:
+#         if lines[0].strip() != HEADER_DISCLAIMER:
+#             file.write(HEADER_DISCLAIMER + "\n")
+#         for line in lines:
+#             if line.startswith("#") or line.strip() == "" or "=" not in line:
+#                 file.write(line)
+#                 continue
+#             secret_name, secret_value = line.split("=", 1)
+#             secret_name = secret_name.strip()  # Remove starting or ending whitespaces
+#             secret_value = secret_value.strip().strip('"')
 
-            # Encrypt the signature using the master_key
-            encrypted_signature = encrypt_value(signature, master_key)
-            encrypted_line = (
-                f'{secret_name} = ""\n{secret_name}_ENCRYPTED = "{encrypted_value}"    #{master_key_env}, {current_datetime}, {encrypted_signature}\n'
-            )
-            file.write(encrypted_line)
+#             # If the secret_name is the master_key_env or already encrypted, write it to the file unchanged
+#             if secret_name == "MASTER_KEY_ENV" or secret_name.strip().endswith("_ENCRYPTED"):
+#                 file.write(line)
+#                 continue
+
+#             # rest of the code
+#             encrypted_value = encrypt_value(secret_value, master_key)
+#             current_datetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+#             signature = base64.b64encode(
+#                 hashlib.sha256(
+#                     f"{encrypted_value}{current_datetime}{master_key}".encode()
+#                 ).digest()
+#             ).decode()
+
+#             # Encrypt the signature using the master_key
+#             encrypted_signature = encrypt_value(signature, master_key)
+#             encrypted_line = (
+#                 f'{secret_name} = ""\n{secret_name}_ENCRYPTED = "{encrypted_value}"    #{master_key_env}, {current_datetime}, {encrypted_signature}\n'
+#             )
+#             file.write(encrypted_line)
 
 #def encrypt_secrets(file_path, master_key_env, master_key=None):
 #    """
