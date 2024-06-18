@@ -63,6 +63,7 @@ import os
 import argparse
 import base64
 import re
+import datetime
 from crypto_utils import decrypt_value, encrypt_value, generate_key
 
 
@@ -192,6 +193,7 @@ def encrypt_secrets(file_path, master_key_env, master_key=None):
                         f"Error encrypting. Ensure you are providing a valid Fernet key."
                     )
                     sys.exit(1)
+                current_datetime = datetime.datetime.now()
                 signature = base64.b64encode(
                     hashlib.sha256(
                         f"{encrypted_value}{current_datetime}{master_key}".encode()
@@ -213,30 +215,57 @@ def encrypt_secrets(file_path, master_key_env, master_key=None):
                 )
     print(f"Done. {count_encrypted} secrets encrypted.")
 
-
-def decrypt_secrets(file_path):
+def decrypt_secrets(file_path, master_key_env, master_key=None):
     """
     Decrypt all secrets in the target file
     """
-    master_key = os.getenv("MASTER_KEY")
+    master_key = os.getenv(master_key_env)
     if not master_key:
-        print("Error: MASTER_KEY environment variable is not set")
+        print(f"Error: {master_key_env} environment variable is not set")
         return
 
     with open(file_path, "r") as file:
         lines = file.readlines()
     with open(file_path, "w") as file:
         file.write(lines[0])  # Preserve the comment block
-        file.write(f"MASTER_KEY = '{master_key}'\n")
+        file.write(f"{master_key_env} = '{master_key}'\n")
         for line in lines[2:]:
             if line.startswith("#") or line.strip() == "":
                 file.write(line)
                 continue
             secret_name = line.split("=")[0].strip()
-            encrypted_value = line.split("=")[1].strip().strip('"')
-            decrypted_value = decrypt_value(encrypted_value, master_key)
-            decrypted_line = f"{secret_name} = '{decrypted_value}'\n"
-            file.write(decrypted_line)
+            if secret_name.endswith("_ENCRYPTED"):
+                original_line = line
+                # encrypted_value = line.split("=",1).strip()[1:].split('"',1).strip().strip('"')
+                encrypted_value = re.search(r'=\s*["\'](.*?)["\']', line).group(1)
+                decrypted_value = decrypt_value(encrypted_value, master_key)
+                decrypted_line = f"{secret_name[:-9]} = '{decrypted_value}'\n"
+                file.write(decrypted_line)
+            else:
+                file.write(line)
+# def decrypt_secrets(file_path):
+#     """
+#     Decrypt all secrets in the target file
+#     """
+#     master_key = os.getenv("MASTER_KEY")
+#     if not master_key:
+#         print("Error: MASTER_KEY environment variable is not set")
+#         return
+#
+#     with open(file_path, "r") as file:
+#         lines = file.readlines()
+#     with open(file_path, "w") as file:
+#         file.write(lines[0])  # Preserve the comment block
+#         file.write(f"MASTER_KEY = '{master_key}'\n")
+#         for line in lines[2:]:
+#             if line.startswith("#") or line.strip() == "":
+#                 file.write(line)
+#                 continue
+#             secret_name = line.split("=")[0].strip()
+#             encrypted_value = line.split("=")[1].strip().strip('"')
+#             decrypted_value = decrypt_value(encrypted_value, master_key)
+#             decrypted_line = f"{secret_name} = '{decrypted_value}'\n"
+#             file.write(decrypted_line)
 
 
 def convert_secrets(file_path, old_master_key, new_master_key):
