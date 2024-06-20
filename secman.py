@@ -64,6 +64,7 @@ import argparse
 import base64
 import re
 import datetime
+import textwrap
 from crypto_utils import decrypt_value, encrypt_value, generate_key
 
 
@@ -151,10 +152,6 @@ def encrypt_secrets(file_path, master_key_env, master_key=None):
     Encrypt all secrets in the target file
     """
     count_encrypted = 0
-    print("Encrypting secrets ...")
-    print(
-        "Note that variables with empty values are left in the file but will not be encrypted."
-    )
     if not master_key:
         master_key = os.getenv(master_key_env)
     lines = open(file_path, "r").readlines()
@@ -193,19 +190,19 @@ def encrypt_secrets(file_path, master_key_env, master_key=None):
                         f"Error encrypting. Ensure you are providing a valid Fernet key."
                     )
                     sys.exit(1)
-                current_datetime = datetime.datetime.now()
+                current_datetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 signature = base64.b64encode(
-                    hashlib.sha256(
-                        f"{encrypted_value}{current_datetime}{master_key}".encode()
+                    hashlib.sha512(
+                        f"{master_key}".encode()
                     ).digest()
                 ).decode()
-                encrypted_line = f'{secret_name} = ""\n{secret_name}_ENCRYPTED = "{encrypted_value}"    #{master_key_env}, {current_datetime}\n'
+                encrypted_line = f'{secret_name} = ""\n{secret_name}_ENCRYPTED = "{encrypted_value}"    #{master_key_env},{signature[-8:]},{current_datetime}\n'
                 file.write(encrypted_line)
                 count_encrypted += 1
                 print(
                     f"Encrypted {secret_name}. Original unencrypted value has been removed from the file."
                 )
-    print(f"Done. {count_encrypted} secrets encrypted.")
+    return count_encrypted
 
 
 def decrypt_secrets(file_path, master_key_env, master_key=None):
@@ -327,15 +324,20 @@ def main():
     Main function to handle command line arguments
     """
     parser = argparse.ArgumentParser(
-        description="Module to manage secrets in a project"
+        description="Module to manage secrets in a project",
+        epilog="""
+        Notes:
+          Empty strings as secret values are not encrypted.
+          After encrypting secrets, the original variables are
+          left in the file, with empty strings as values.
+        """
     )
     parser.add_argument("-l", "--list", action="store_true", help="List all secrets")
-    parser.add_argument("-d", "--delete", metavar="SECRET_NAME", help="Delete a secret")
     parser.add_argument(
         "-e", "--encrypt", action="store_true", help="Encrypt all secrets in a file"
     )
     parser.add_argument(
-        "-D", "--decrypt", action="store_true", help="Decrypt all secrets in a file"
+        "-d", "--decrypt", action="store_true", help="Decrypt all secrets in a file"
     )
     parser.add_argument(
         "-c",
@@ -365,10 +367,13 @@ def main():
 
     if args.list:
         list_secrets(args.file)
-    elif args.delete:
-        delete_secret(args.file, args.delete)
     elif args.encrypt:
-        encrypt_secrets(args.file, psecrets.MASTER_KEY_ENV)
+        print("Encrypting secrets ...")
+        print(
+            "Empty string for secrets are not be encrypted."
+        )
+        n = encrypt_secrets(args.file, psecrets.MASTER_KEY_ENV)
+        print(f"Done. {n} secrets encrypted.")
     elif args.decrypt:
         decrypt_secrets(args.file, psecrets.MASTER_KEY_ENV, master_key)
     elif args.convert:
