@@ -199,15 +199,7 @@ def encrypt_secrets(file_path, master_key_env, master_key=None):
                         f"{encrypted_value}{current_datetime}{master_key}".encode()
                     ).digest()
                 ).decode()
-                # Encrypt the signature using the master_key
-                try:
-                    encrypted_signature = encrypt_value(signature, master_key)
-                except Exception as e:
-                    print(
-                        f"Error encrypting. Ensure you are providing a valid Fernet key."
-                    )
-                    sys.exit(1)
-                encrypted_line = f'{secret_name} = ""\n{secret_name}_ENCRYPTED = "{encrypted_value}"    #{master_key_env}, {current_datetime}, {encrypted_signature}\n'
+                encrypted_line = f'{secret_name} = ""\n{secret_name}_ENCRYPTED = "{encrypted_value}"    #{master_key_env}, {current_datetime}\n'
                 file.write(encrypted_line)
                 count_encrypted += 1
                 print(
