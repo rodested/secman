@@ -215,55 +215,56 @@ def encrypt_secrets(file_path, master_key_env, master_key=None):
                 )
     print(f"Done. {count_encrypted} secrets encrypted.")
 
+
 def decrypt_secrets(file_path, master_key_env, master_key=None):
     """
     Decrypt all secrets in the target file
     """
+    # Ensure that the master_key is provided
     master_key = os.getenv(master_key_env)
     if not master_key:
         print(f"Error: {master_key_env} environment variable is not set")
         return
-
+    # Build a list of existing encrypted secrets (<name>_ENCRYPTED) in the file
+    encrypted_secrets = set()
     with open(file_path, "r") as file:
         lines = file.readlines()
+    encrypted_pattern = re.compile(r"^\s*([a-zA-Z_][a-zA-Z0-9_]*_ENCRYPTED)\s*=")
+    for line in lines:
+        match = encrypted_pattern.match(line)
+        if match:
+            encrypted_secrets.add(match.group(1))
+    # Process the file:
+    # - If the line is a comment or empty, write it as is
+    # - If the line is a secret, decrypt it and write the decrypted value
+    # - other lines are removed
     with open(file_path, "w") as file:
-        file.write(lines[0])  # Preserve the comment block
-        file.write(f"{master_key_env} = '{master_key}'\n")
-        for line in lines[2:]:
+        for line in lines:
+            # Preserve comments and empty lines
             if line.startswith("#") or line.strip() == "":
                 file.write(line)
                 continue
-            secret_name = line.split("=")[0].strip()
-            if secret_name.endswith("_ENCRYPTED"):
-                encrypted_value = re.search(r'=\s*["\'](.*?)["\']', line).group(1)
-                decrypted_value = decrypt_value(encrypted_value, master_key)
-                decrypted_line = f"{secret_name[:-10]} = '{decrypted_value}'\n"
-                file.write(decrypted_line)
-            else:
-                file.write(line)
-# def decrypt_secrets(file_path):
-#     """
-#     Decrypt all secrets in the target file
-#     """
-#     master_key = os.getenv("MASTER_KEY")
-#     if not master_key:
-#         print("Error: MASTER_KEY environment variable is not set")
-#         return
-#
-#     with open(file_path, "r") as file:
-#         lines = file.readlines()
-#     with open(file_path, "w") as file:
-#         file.write(lines[0])  # Preserve the comment block
-#         file.write(f"MASTER_KEY = '{master_key}'\n")
-#         for line in lines[2:]:
-#             if line.startswith("#") or line.strip() == "":
-#                 file.write(line)
-#                 continue
-#             secret_name = line.split("=")[0].strip()
-#             encrypted_value = line.split("=")[1].strip().strip('"')
-#             decrypted_value = decrypt_value(encrypted_value, master_key)
-#             decrypted_line = f"{secret_name} = '{decrypted_value}'\n"
-#             file.write(decrypted_line)
+            # Identify and Process the secret lines
+            match = re.search(r'([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*["\'](.*?)["\']', line)
+            if match:
+                secret_name = match.group(1)
+                encrypted_value = match.group(2)
+                # If the secret_name value found does not end with _ENCRYPTED and
+                # the secret_name+"_ENCRYPTED" is not in the encrypted_secrets set then
+                # write the line as is else skip the line
+                if secret_name == "MASTER_KEY_ENV":
+                    file.write(line)
+                    continue
+                if (
+                    not secret_name.endswith("_ENCRYPTED")
+                    and f"{secret_name}_ENCRYPTED" not in encrypted_secrets
+                ):
+                    file.write(f"{secret_name} = {encrypted_value}\n")
+                elif secret_name.endswith("_ENCRYPTED"):
+                    encrypted_value = re.search(r'=\s*["\'](.*?)["\']', line).group(1)
+                    decrypted_value = decrypt_value(encrypted_value, master_key)
+                    decrypted_line = f"{secret_name[:-10]} = '{decrypted_value}'\n"
+                    file.write(decrypted_line)
 
 
 def convert_secrets(file_path, old_master_key, new_master_key):
@@ -389,6 +390,7 @@ def main():
         generate_key()
     else:
         parser.print_help()
+
 
 if __name__ == "__main__":
     main()
