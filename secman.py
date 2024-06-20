@@ -254,16 +254,11 @@ def decrypt_secrets(file_path, master_key_env, master_key=None):
                 # write the line as is else skip the line
                 if secret_name == "MASTER_KEY_ENV":
                     file.write(line)
-                    continue
-                if (
-                    not secret_name.endswith("_ENCRYPTED")
-                    and f"{secret_name}_ENCRYPTED" not in encrypted_secrets
-                ):
-                    file.write(f"{secret_name} = {encrypted_value}\n")
+                elif not secret_name.endswith("_ENCRYPTED") and f"{secret_name}_ENCRYPTED" not in encrypted_secrets:
+                    file.write(f'{secret_name} = "{encrypted_value}"\n')
                 elif secret_name.endswith("_ENCRYPTED"):
-                    encrypted_value = re.search(r'=\s*["\'](.*?)["\']', line).group(1)
                     decrypted_value = decrypt_value(encrypted_value, master_key)
-                    decrypted_line = f"{secret_name[:-10]} = '{decrypted_value}'\n"
+                    decrypted_line = f'{secret_name[:-10]} = "{decrypted_value}"\n'
                     file.write(decrypted_line)
 
 
