@@ -235,11 +235,9 @@ def decrypt_secrets(file_path, master_key_env, master_key=None):
                 continue
             secret_name = line.split("=")[0].strip()
             if secret_name.endswith("_ENCRYPTED"):
-                original_line = line
-                # encrypted_value = line.split("=",1).strip()[1:].split('"',1).strip().strip('"')
                 encrypted_value = re.search(r'=\s*["\'](.*?)["\']', line).group(1)
                 decrypted_value = decrypt_value(encrypted_value, master_key)
-                decrypted_line = f"{secret_name[:-9]} = '{decrypted_value}'\n"
+                decrypted_line = f"{secret_name[:-10]} = '{decrypted_value}'\n"
                 file.write(decrypted_line)
             else:
                 file.write(line)
