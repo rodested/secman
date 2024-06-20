@@ -14,13 +14,12 @@ and a valid Fernet key is required to encrypt and decrypt the secrets.
 Command line arguments:
     -h, --help: Show help
     -l, --list: List all secrets
-    -d, --delete: Delete a secret
     -e, --encrypt: Encrypt all secrets in a file
     -d, --decrypt: Decrypt all secrets in a file
-    -c, --convert: Convert secrets in a file to a different MASTER key
-    -m, --master: Set the MASTER key value (env var name)
     -f, --file: Set the target file to manage (default: project_secrets.py)
     -k, --key: provides you a valid encryption key (valid Fernet key)
+    -m, --master: Set the MASTER key value (env var name)
+    -c, --convert: Convert secrets in a file to a different MASTER key
 
 The target file should have the following format:
 - A comment block at the top with information about the file
@@ -55,6 +54,9 @@ Date: 2024-06-18
 """
 
 # TODO: Test the master_key as Fernet key at the very beginning and remove try/except blocks for Encryption/Decryption
+# TODO: Add a function to validate the Fernet key
+# TODO: Implement the convert_secrets function
+# TODO: Implement the verification of the signature when converting secrets
 
 import importlib.util
 import sys
@@ -276,16 +278,18 @@ def convert_secrets(file_path, old_master_key, new_master_key):
             file.write(converted_line)
 
 
-def set_master_key(file_path, master_key):
+def set_master_key(file_path, master_key_env):
     """
     Set the MASTER_KEY_ENV value in the target file
     """
     with open(file_path, "r") as file:
         lines = file.readlines()
     with open(file_path, "w") as file:
-        file.write(lines[0])  # Preserve the comment block
-        file.write(f"MASTER_KEY_ENV = '{master_key}'\n")
-        file.writelines(lines[2:])
+        for line in lines:
+            if re.match(r"^\s*MASTER_KEY_ENV\s*=", line):
+                file.write(f'MASTER_KEY_ENV = "{master_key_env}"\n')
+            else:
+                file.write(line)
 
 
 # Function to encrypt a message
@@ -332,6 +336,12 @@ def main():
           left in the file, with empty strings as values.
         """
     )
+    parser.add_argument(
+        "-m",
+        "--master-key-env",
+        metavar="MASTER_KEY_ENV_NAME",
+        help="The name of the environment variable name to be set as the master key in the secrets file",
+    )
     parser.add_argument("-l", "--list", action="store_true", help="List all secrets")
     parser.add_argument(
         "-e", "--encrypt", action="store_true", help="Encrypt all secrets in a file"
@@ -344,7 +354,7 @@ def main():
         "--convert",
         metavar=("OLD_MASTER_KEY", "NEW_MASTER_KEY"),
         nargs=2,
-        help="Convert secrets in a file to a different MASTER key",
+        help="Convert secrets in a file to a different MASTER key - NOT IMPLEMENTED YET",
     )
     parser.add_argument(
         "-f",
@@ -361,25 +371,28 @@ def main():
     )
 
     args = parser.parse_args()
-
     psecrets = load_config_file("psecret", args.file)
-    master_key = get_master_key(psecrets.MASTER_KEY_ENV)
 
-    if args.list:
+    if args.master_key_env:
+        set_master_key(args.file, args.master_key_env)
+    elif args.key:
+        generate_key()
+    elif args.list:
         list_secrets(args.file)
     elif args.encrypt:
+        master_key = get_master_key(psecrets.MASTER_KEY_ENV)
         print("Encrypting secrets ...")
         print(
-            "Empty string for secrets are not be encrypted."
+            "NOTE: Empty string as secrets are not encrypted."
         )
         n = encrypt_secrets(args.file, psecrets.MASTER_KEY_ENV)
         print(f"Done. {n} secrets encrypted.")
     elif args.decrypt:
+        master_key = get_master_key(psecrets.MASTER_KEY_ENV)
         decrypt_secrets(args.file, psecrets.MASTER_KEY_ENV, master_key)
     elif args.convert:
+        master_key = get_master_key(psecrets.MASTER_KEY_ENV)
         convert_secrets(args.file, args.convert[0], args.convert[1])
-    elif args.key:
-        generate_key()
     else:
         parser.print_help()
 
