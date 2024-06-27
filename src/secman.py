@@ -8,7 +8,7 @@ Command line arguments:
     -e, --encrypt: Encrypt all secrets in a file
     -d, --decrypt: Decrypt all secrets in a file
     -f, --file: Set the target file to manage (default: project_secrets.py)
-    -o, --overwrite: Write the output in the same file as input (IMPORTANT: overwriting existing content)
+    -o, --overwrite: Overwrite the input file with the output (IMPORTANT: use with caution)
     -k, --key: provides you a valid encryption key (valid Fernet key)
     -m, --master: Set the MASTER key value (env var name)
     -c, --convert: Convert secrets in a file to a different MASTER key

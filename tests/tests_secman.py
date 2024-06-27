@@ -1,8 +1,8 @@
 import unittest
 from cryptography.fernet import Fernet
-from crypto_utils import decrypt_value
-from crypto_utils import derive_key, encrypt_value
-from crypto_utils import is_valid_fernet_key
+from libs.crypto_utils import decrypt_value
+from libs.crypto_utils import derive_key, encrypt_value
+from libs.crypto_utils import is_valid_fernet_key
 
 
 class TestFernetKeyValidation(unittest.TestCase):
