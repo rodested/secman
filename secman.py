@@ -2,24 +2,49 @@
 secman.py
 Module to manage secrets in a project
 
-This module provides a set of functions to manage secrets in a project.
-Reads the command line arguments and performs the requested action.
-It reads the contents of the file and line per line:
-  - ignores comments and empty lines
-  - in other cases, processes the variable name and value
-The module uses the cryptography library for encryption and decryption.
-The encryption algorithm used is the Fernet symmetric encryption algorithm,
-and a valid Fernet key is required to encrypt and decrypt the secrets.
-
 Command line arguments:
     -h, --help: Show help
     -l, --list: List all secrets
     -e, --encrypt: Encrypt all secrets in a file
     -d, --decrypt: Decrypt all secrets in a file
     -f, --file: Set the target file to manage (default: project_secrets.py)
+    -o, --overwrite: Write the output in the same file as input (IMPORTANT: overwriting existing content)
     -k, --key: provides you a valid encryption key (valid Fernet key)
     -m, --master: Set the MASTER key value (env var name)
     -c, --convert: Convert secrets in a file to a different MASTER key
+
+Overview:
+    Main functionality:
+        1. Reads unencrypted secrets from a file and
+            - encrypts them into a new file_encrypted.py
+            - encrypts them in the same file
+        2. Reads encrypted secrets from a file and
+            - decrypts them into a new file_decrypted.py
+            - decrypts them in the same file
+    Other funcionality:
+        Read the help. It is self-explanatory.
+
+Description:
+This module provides a set of functions to manage secrets in a project.
+When run, it reads the command line arguments and performs the requested action.
+For the input and output files it reads the contents of the file and line per line:
+  - comments and empty lines in the output file -if exists- are left as they are
+  - ignores comments and empty lines in the input file
+  - in other cases, processes the variable name and value, as requested
+
+To use the module:
+The module uses the cryptography library for encryption and decryption.
+The encryption algorithm used is the Fernet symmetric encryption algorithm,
+and a valid Fernet key is required to encrypt and decrypt the secrets.
+Basically, create a valid Fernet key and set it in an environment variable,
+which name is the one defined in the MASTER_KEY_ENV variable in the target file.
+Then, run the module with the desired action.
+
+Implemented behaviour to manage secrets:
+    Encyption:
+    - a non encrypted secret included in the origin file is encrypted and written the target file, overwriting any values
+    - an encrypted secret included in the origin file is copied as is to the target file, overwriting the encrypted value if already exists in the target file
+    - an encrypted secret included in the target file is kept as is in the target file, unless any of the previous cases apply
 
 The target file should have the following format:
 - A comment block at the top with information about the file
@@ -50,13 +75,15 @@ References:
 
 
 Author: EduardoRE
-Date: 2024-06-18
+Date (1st): 2024-06-10
+Date: 2024-06-26
 """
 
 # TODO: Test the master_key as Fernet key at the very beginning and remove try/except blocks for Encryption/Decryption
 # TODO: Add a function to validate the Fernet key
 # TODO: Implement the convert_secrets function
 # TODO: Implement the verification of the signature when converting secrets
+
 
 import importlib.util
 import sys
@@ -66,8 +93,7 @@ import argparse
 import base64
 import re
 import datetime
-import textwrap
-from crypto_utils import decrypt_value, encrypt_value, generate_key
+from libs.crypto_utils import decrypt_value, encrypt_value, generate_key
 
 
 HEADER_DISCLAIMER = (
@@ -149,7 +175,7 @@ def delete_secret(file_path, secret_name):
             file.write(line)
 
 
-def encrypt_secrets(file_path, master_key_env, master_key=None):
+def encrypt_secrets(file_path, master_key_env, master_key=None, overwrite=False):
     """
     Encrypt all secrets in the target file
     """
@@ -164,7 +190,11 @@ def encrypt_secrets(file_path, master_key_env, master_key=None):
         match = encrypted_pattern.match(line)
         if match:
             encrypted_secrets.add(match.group(1))
-    with open(file_path, "w") as file:
+    if overwrite:
+        output_file = file_path
+    else:
+        output_file = file_path.replace(".py", "_encrypted.py")
+    with open(output_file, "w") as file:
         if lines[0].strip() != HEADER_DISCLAIMER:
             file.write(HEADER_DISCLAIMER + "\n")
         for line in lines:
@@ -194,20 +224,18 @@ def encrypt_secrets(file_path, master_key_env, master_key=None):
                     sys.exit(1)
                 current_datetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 signature = base64.b64encode(
-                    hashlib.sha512(
-                        f"{master_key}".encode()
-                    ).digest()
+                    hashlib.sha512(f"{master_key}".encode()).digest()
                 ).decode()
                 encrypted_line = f'{secret_name} = ""\n{secret_name}_ENCRYPTED = "{encrypted_value}"    #{master_key_env},{signature[-8:]},{current_datetime}\n'
                 file.write(encrypted_line)
                 count_encrypted += 1
                 print(
-                    f"Encrypted {secret_name}. Original unencrypted value has been removed from the file."
+                    f"Encrypted {secret_name}. Variable for unencrypted value has been written as empty string in the output file."
                 )
     return count_encrypted
 
 
-def decrypt_secrets(file_path, master_key_env, master_key=None):
+def decrypt_secrets(file_path, master_key_env, master_key=None, overwrite=False):
     """
     Decrypt all secrets in the target file
     """
@@ -225,11 +253,15 @@ def decrypt_secrets(file_path, master_key_env, master_key=None):
         match = encrypted_pattern.match(line)
         if match:
             encrypted_secrets.add(match.group(1))
+    if overwrite:
+        output_file = file_path
+    else:
+        output_file = file_path.replace(".py", "_decrypted.py")
     # Process the file:
     # - If the line is a comment or empty, write it as is
     # - If the line is a secret, decrypt it and write the decrypted value
     # - other lines are removed
-    with open(file_path, "w") as file:
+    with open(output_file, "w") as file:
         for line in lines:
             # Preserve comments and empty lines
             if line.startswith("#") or line.strip() == "":
@@ -245,7 +277,10 @@ def decrypt_secrets(file_path, master_key_env, master_key=None):
                 # write the line as is else skip the line
                 if secret_name == "MASTER_KEY_ENV":
                     file.write(line)
-                elif not secret_name.endswith("_ENCRYPTED") and f"{secret_name}_ENCRYPTED" not in encrypted_secrets:
+                elif (
+                    not secret_name.endswith("_ENCRYPTED")
+                    and f"{secret_name}_ENCRYPTED" not in encrypted_secrets
+                ):
                     file.write(f'{secret_name} = "{encrypted_value}"\n')
                 elif secret_name.endswith("_ENCRYPTED"):
                     decrypted_value = decrypt_value(encrypted_value, master_key)
@@ -329,12 +364,12 @@ def main():
     """
     parser = argparse.ArgumentParser(
         description="Module to manage secrets in a project",
-        epilog="""
+        epilog="""\
         Notes:
           Empty strings as secret values are not encrypted.
           After encrypting secrets, the original variables are
           left in the file, with empty strings as values.
-        """
+        """,
     )
     parser.add_argument(
         "-m",
@@ -369,6 +404,12 @@ def main():
         action="store_true",
         help="Print a valid encryption key (valid Fernet key)",
     )
+    parser.add_argument(
+        "-o",
+        "--overwrite",
+        action="store_true",
+        help="Write the output in the same file as input (overwriting existing content)",
+    )
 
     args = parser.parse_args()
     psecrets = load_config_file("psecret", args.file)
@@ -382,14 +423,16 @@ def main():
     elif args.encrypt:
         master_key = get_master_key(psecrets.MASTER_KEY_ENV)
         print("Encrypting secrets ...")
-        print(
-            "NOTE: Empty string as secrets are not encrypted."
+        print("NOTE: Empty string as secrets are not encrypted.")
+        n = encrypt_secrets(
+            args.file, psecrets.MASTER_KEY_ENV, overwrite=args.overwrite
         )
-        n = encrypt_secrets(args.file, psecrets.MASTER_KEY_ENV)
         print(f"Done. {n} secrets encrypted.")
     elif args.decrypt:
         master_key = get_master_key(psecrets.MASTER_KEY_ENV)
-        decrypt_secrets(args.file, psecrets.MASTER_KEY_ENV, master_key)
+        decrypt_secrets(
+            args.file, psecrets.MASTER_KEY_ENV, master_key, overwrite=args.overwrite
+        )
     elif args.convert:
         master_key = get_master_key(psecrets.MASTER_KEY_ENV)
         convert_secrets(args.file, args.convert[0], args.convert[1])
