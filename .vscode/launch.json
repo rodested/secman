@@ -5,14 +5,14 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python Debugger: Current File",
+            "name": "Py Debug: Current File",
             "type": "debugpy",
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal"
         },
         {
-            "name": "Main file: Encrypt",
+            "name": "Py Debug: Main file (Encrypt)",
             "type": "debugpy",
             "request": "launch",
             "program": "secman.py",
@@ -24,7 +24,7 @@
             }
         },
         {
-            "name": "Main file: Decrypt",
+            "name": "Py Debug: Main file (Decrypt)",
             "type": "debugpy",
             "request": "launch",
             "program": "secman.py",
