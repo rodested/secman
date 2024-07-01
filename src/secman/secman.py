@@ -217,16 +217,16 @@ def encrypt_secrets(file_path, master_key_env, master_key=None, overwrite=False)
             else:
                 try:
                     encrypted_value = encrypt_value(secret_value, master_key)
-                except Exception as e:
+                except Exception:
                     print(
-                        f"Error encrypting. Ensure you are providing a valid Fernet key."
+                        "Error encrypting. Ensure you are providing a valid Fernet key."
                     )
                     sys.exit(1)
                 current_datetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 signature = base64.b64encode(
                     hashlib.sha512(f"{master_key}".encode()).digest()
                 ).decode()
-                encrypted_line = f'{secret_name} = ""\n{secret_name}_ENCRYPTED = "{encrypted_value}"    #{master_key_env},{signature[-8:]},{current_datetime}\n'
+                encrypted_line = f'{secret_name} = ""\n{secret_name}_ENCRYPTED = "{encrypted_value}"    # {master_key_env},{signature[-8:]},{current_datetime}\n'
                 file.write(encrypted_line)
                 count_encrypted += 1
                 print(
