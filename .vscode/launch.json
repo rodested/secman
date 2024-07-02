@@ -20,6 +20,8 @@
                 "-e"
             ],
             "env": {
+                // This is the password for the encryption/decryption tests:
+                // Only for testing purposes, do not use in production.
                 "MKEYPASSWD": "FQRDX23t2Gp0C_BlpgOLG6-uHLxxAN4P2bl4qrp4sBY="
             }
         },
@@ -32,8 +34,21 @@
                 "-d"
             ],
             "env": {
+                // This is the password for the encryption/decryption tests:
+                // Only for testing purposes, do not use in production.
                 "MKEYPASSWD": "FQRDX23t2Gp0C_BlpgOLG6-uHLxxAN4P2bl4qrp4sBY="
             }
+        },
+        {
+            "name": "Debug Unit Test",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "purpose": [
+                "debug-test"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
         }
     ]
 }

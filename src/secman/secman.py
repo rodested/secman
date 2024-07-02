@@ -83,6 +83,7 @@ Date: 2024-06-26
 # TODO: Add a function to validate the Fernet key
 # TODO: Implement the convert_secrets function
 # TODO: Implement the verification of the signature when converting secrets
+# TODO: Test the option "justMyCode" in the VSCode launch.json debug configurations, and apply to all the debug options
 
 
 import importlib.util
