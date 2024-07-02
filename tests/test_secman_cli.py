@@ -1,3 +1,5 @@
+"""Test cases for the secman command line encryption actions"""
+
 import os
 import sys
 import unittest
@@ -50,6 +52,7 @@ class TestSecmanCLI(unittest.TestCase):
         output_files = [
             "../../tests/input/project_secrets_test_01inp_encrypted.py",
             "../../tests/input/project_secrets_test_01inp_encrypted_decrypted.py",
+            "../../tests/input/project_secrets_test_02inp.py",
             "../../tests/input/project_secrets_test_03inp_encrypted.py",
         ]
         for file in output_files:

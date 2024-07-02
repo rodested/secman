@@ -1,7 +1,9 @@
-# Test cases for the secman module
-#
-# References:
-#   https://stackoverflow.com/questions/71918703/visual-studio-code-pylance-report-missing-imports
+"""
+Test cases for the secman specific crypto module
+
+References:
+  https://stackoverflow.com/questions/71918703/visual-studio-code-pylance-report-missing-imports
+"""
 
 import unittest
 from cryptography.fernet import Fernet
