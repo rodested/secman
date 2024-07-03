@@ -1,15 +1,18 @@
 [project]
 name = "secman"
-version = "0.1.0"
-description = "Default template for PDM package"
+version = "0.1.1"
+description = "Secrets Manager. CLI and a class to manage secrets in your project."
 authors = [
     {name = "EduardoRE", email = "rodested@yahoo.com"},
 ]
 dependencies = []
-requires-python = "==3.11.*"
+requires-python = ">=3.10"
 readme = "README.md"
-license = {text = "MIT"}
+license = {text = "AGPL-3.0-only"}
 
+[project.urls]
+Homepage = "https://github.com/rodested/secman"
+Issues = "https://github.com/rodested/secman/issues"
 
 [tool.pdm]
 distribution = false
