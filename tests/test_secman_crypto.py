@@ -3,6 +3,7 @@ Test cases for the secman specific crypto module
 
 References:
   https://stackoverflow.com/questions/71918703/visual-studio-code-pylance-report-missing-imports
+  https://stackoverflow.com/questions/76036074/cannot-debug-test-case-in-vs-code-found-duplicate-in-env-path
 """
 
 import unittest
@@ -12,7 +13,7 @@ from libs.crypto_utils import derive_key, encrypt_value
 from libs.crypto_utils import is_valid_fernet_key
 
 
-class TestFernetKeyValidation(unittest.TestCase):
+class TestCrypto_FernetKeyValidation(unittest.TestCase):
     def test_valid_fernet_key(self):
         # Generate a valid Fernet key
         valid_key = Fernet.generate_key()
@@ -24,7 +25,7 @@ class TestFernetKeyValidation(unittest.TestCase):
         self.assertFalse(is_valid_fernet_key(invalid_key))
 
 
-class TestEncryption_fernet_key(unittest.TestCase):
+class TestCrypto_EncDecWithFernetKey(unittest.TestCase):
     def setUp(self):
         # self.master_key = 'my_master_key'
         self.master_key = Fernet.generate_key().decode()
@@ -39,7 +40,7 @@ class TestEncryption_fernet_key(unittest.TestCase):
         self.assertEqual(self.value, decrypted_value)
 
 
-class TestEncryption_custom_key(unittest.TestCase):
+class TestCrypto_InvalidCustomKey(unittest.TestCase):
     def setUp(self):
         self.master_key = "my_master_key"
         self.value = "Hello, World!"

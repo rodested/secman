@@ -26,6 +26,8 @@ from .libs import are_files_equal
 # TODO: All generated output files should be written to the tests/output directory,
 # and include this directory in the .gitignore file
 
+# TODO: Move the test keys to a separate file and import them in the test cases
+
 # Configure logging when running tests:
 logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 # Now we can use logging.info(), logging.debug(), logging.error(), etc.
@@ -180,7 +182,7 @@ class TestSecmanCLI(unittest.TestCase):
             )
         )
         # Delete the original file and check that decryption doesn't
-        # overwrite the original unencrypted input file:
+        # overwrite the original decrypted input file:
         file_path = Path("../../tests/input/project_secrets_test_01inp.py")
         file_path.unlink()
         self.assertFalse(file_path.exists())

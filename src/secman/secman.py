@@ -15,7 +15,7 @@ Command line arguments:
 
 Overview:
     Main functionality:
-        1. Reads unencrypted secrets from a file and
+        1. Reads decrypted secrets from a file and
             - encrypts them into a new file_encrypted.py
             - encrypts them in the same file
         2. Reads encrypted secrets from a file and
@@ -231,7 +231,7 @@ def encrypt_secrets(file_path, master_key_env, master_key=None, overwrite=False)
                 file.write(encrypted_line)
                 count_encrypted += 1
                 print(
-                    f"Encrypted {secret_name}. Variable for unencrypted value has been written as empty string in the output file."
+                    f"Encrypted {secret_name}. Variable for decrypted value has been written as empty string in the output file."
                 )
     return count_encrypted
 

@@ -25,5 +25,26 @@ auto detect (auto discover) the tests in the tests folder and apply the correct 
 Done this, you'll be able to run tests directly from VSCode, performing all imports properly and
 running fine.
 
+## Release Notes
+
+### Considerations
+- <project_folder> is the folder which holds the whole project (ie. subdirs src, tests, README.md must be visible when running a "ls")
+
+### stable-0.1.0
+- Tests for cli working
+- Tests for crypto utils working
+- tests runnable from VSCode
+- Tests runnable from inside <project_folder>:
+  - <project_folder>$> python -m unittest
+  - <project_folder>$> python -m pytest
+
+### stable-0.1.1
+- Added module with class SecretsManager. Create an object from this class and use it to decrypt secrets within your project
+- Added tests for SecretsManager
+- You can run secman.py from any directory (no import issues when running it), but need to provide full path to the script:
+  - $> python <whatever>/<project_folder>/src/secman/secman.py -h
+
 ## References
 [Pytest - Good Integration Practices](https://docs.pytest.org/en/7.1.x/explanation/goodpractices.html)
+[VSCode - Pylance reports missing imports](https://stackoverflow.com/questions/71918703/visual-studio-code-pylance-report-missing-imports)
+[VSCode - Error debugging Tests: Found duplicate in env PATH](https://stackoverflow.com/questions/76036074/cannot-debug-test-case-in-vs-code-found-duplicate-in-env-path)

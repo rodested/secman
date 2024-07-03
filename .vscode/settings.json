@@ -12,6 +12,6 @@
         "--max-line-length=240"
      ],
     "python.analysis.extraPaths": [
-        "./src/secman"
+        "./src/secman/"
     ]
 }
