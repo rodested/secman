@@ -94,7 +94,7 @@ import argparse
 import base64
 import re
 import datetime
-from .libs.crypto_utils import decrypt_value, encrypt_value, generate_key
+from secman.libs.crypto_utils import decrypt_value, encrypt_value, generate_key
 
 
 HEADER_DISCLAIMER = (

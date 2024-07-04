@@ -1,1 +1,1 @@
-__package__ = "secman"
+#__package__ = "secman"
