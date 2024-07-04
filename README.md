@@ -39,6 +39,27 @@ auto detect (auto discover) the tests in the tests folder and apply the correct 
 Done this, you'll be able to run tests directly from VSCode, performing all imports properly and
 running fine.
 
+## Using PDM as python project manager
+
+See:
+
+- https://pdm-project.org/latest/usage/venv/
+
+### How to run "pdm shell" while having all other pdm commands available
+To include the option to run "pdm shell" to load your pdm set virtual environment, run the next in your shell, or run it from your .bashrc or .bashprofile
+
+```
+$> source utils/pdm_custom_call.sh
+```
+and now you can run the next to active or activate the environment:
+```
+$> pdm shell
+... now the environment is enabled ...
+$> deactivate
+... and now it is deactivated
+```
+a
+
 ## Release Notes
 
 ### stable-0.1.0
