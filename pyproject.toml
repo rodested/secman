@@ -1,6 +1,6 @@
 [project]
 name = "secman"
-version = "0.1.1"
+version = "0.1.2"
 description = "Secrets Manager. CLI and a class to manage secrets in your project."
 authors = [
     {name = "EduardoRE", email = "rodested@yahoo.com"},
