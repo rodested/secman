@@ -6,11 +6,14 @@ References:
   https://stackoverflow.com/questions/76036074/cannot-debug-test-case-in-vs-code-found-duplicate-in-env-path
 """
 
+import sys
+import os
 import unittest
 from cryptography.fernet import Fernet
-from libs.crypto_utils import decrypt_value
-from libs.crypto_utils import derive_key, encrypt_value
-from libs.crypto_utils import is_valid_fernet_key
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
+from secman.libs.crypto_utils import decrypt_value
+from secman.libs.crypto_utils import derive_key, encrypt_value
+from secman.libs.crypto_utils import is_valid_fernet_key
 
 
 class TestCrypto_FernetKeyValidation(unittest.TestCase):
