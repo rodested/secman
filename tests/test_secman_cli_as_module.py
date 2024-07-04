@@ -44,7 +44,7 @@ class TestSecmanCLI(unittest.TestCase):
         # Set the environment variable for the master key password
         os.environ["MKEYPASSWD"] = "FQRDX23t2Gp0C_BlpgOLG6-uHLxxAN4P2bl4qrp4sBY="
         # Change the current working directory to src/secman to run the scripts:
-        #os.chdir("src")  # This works, with no need of passing PYTHONPATH
+        # os.chdir("src")  # This works, with no need of passing PYTHONPATH
         # Copy the current environment variables:
         self.env = os.environ.copy()
         self.current_dir = os.getcwd()
@@ -83,24 +83,24 @@ class TestSecmanCLI(unittest.TestCase):
 
         # Run the secman.py script with the -h option to get help
         # with the same Python interpreter that is used to run this test
-        #logging.info("\n")
-        #logging.info(os.getcwd())
-        #logging.info("\n")
+        # logging.info("\n")
+        # logging.info(os.getcwd())
+        # logging.info("\n")
         result = subprocess.run(
             [sys.executable, "-m", "secman", "-h"],
             capture_output=True,
             text=True,
             env=self.env,
         )
-        #logging.info("\n")
-        #logging.info(f'env: {self.env.get("PYTHONPATH", "")}')
-        #logging.info("\n")
-        #logging.info(os.getcwd())
-        #logging.info("\n")
-        #logging.info(f"stdout: {result.stderr}")
-        #logging.info("\n")
-        #logging.info(f"stdout: {result.stdout}")
-        #logging.info("\n")
+        # logging.info("\n")
+        # logging.info(f'env: {self.env.get("PYTHONPATH", "")}')
+        # logging.info("\n")
+        # logging.info(os.getcwd())
+        # logging.info("\n")
+        # logging.info(f"stdout: {result.stderr}")
+        # logging.info("\n")
+        # logging.info(f"stdout: {result.stdout}")
+        # logging.info("\n")
         # Check if the help message is in the output:
         self.assertEqual(result.returncode, 0)
         self.assertIn("usage:", result.stdout)
