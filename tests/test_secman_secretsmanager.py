@@ -7,8 +7,10 @@ References:
 """
 
 import os
+import sys
 import unittest
-from secretsmanager import SecretsManager
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
+from secman.secretsmanager import SecretsManager
 
 
 class TestSecretsManager(unittest.TestCase):
