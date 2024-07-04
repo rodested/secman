@@ -1,5 +1,9 @@
 README.MD
 
+### Considerations
+- [PROJECT_FOLDER] is the folder which holds the whole project (ie. subdirs src, tests, README.md must be visible when running a "ls")
+
+
 ## Running Tests
 
 To run the tests using `unittest` or `pytest`, you can use the following command in the terminal.
@@ -14,8 +18,18 @@ $ python -m unittest
 
 If you use pytest:
 ```
-$ python -m pytest tests/*
+$ python -m pytest
 ```
+
+## Run the module
+
+To test the module you can run it, by providing a path to where the module is and running it:
+
+Linux:
+```
+<project_folder>$> PYTHONPATH="./src" python -m secman -h
+```
+
 ### Configuring tests in VSCode
 
 Launch VSCode from secman_project folder (or open that folder as the main one for the project).
@@ -26,9 +40,6 @@ Done this, you'll be able to run tests directly from VSCode, performing all impo
 running fine.
 
 ## Release Notes
-
-### Considerations
-- <project_folder> is the folder which holds the whole project (ie. subdirs src, tests, README.md must be visible when running a "ls")
 
 ### stable-0.1.0
 - Tests for cli working
@@ -43,6 +54,11 @@ running fine.
 - Added tests for SecretsManager
 - You can run secman.py from any directory (no import issues when running it), but need to provide full path to the script:
   - $> python <whatever>/<project_folder>/src/secman/secman.py -h
+
+### stable-0.1.2
+- Reviewed to be launched as module (aka unittest, venv, etc.). Required files added
+- Tests modified to work running it as module in the cli (-m)
+- Now can be launched as $>python -m secman ... (include the secman folder in the PYTHONPATH)
 
 ## References
 [Pytest - Good Integration Practices](https://docs.pytest.org/en/7.1.x/explanation/goodpractices.html)
