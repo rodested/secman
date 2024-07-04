@@ -1,3 +1,1 @@
-# from libs import crypto_utils as crypto_utils
-# import libs.crypto_utils
-__package__ = ""
+__package__ = "secman"

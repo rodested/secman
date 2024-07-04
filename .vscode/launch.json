@@ -47,7 +47,7 @@
             "purpose": [
                 "debug-test"
             ],
-            "console": "integratedTerminal",
+            //"console": "integratedTerminal",
             "justMyCode": true
         }
     ]
