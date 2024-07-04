@@ -5,7 +5,7 @@ Module with the Class to be used in python modules to decrypt secrets
 """
 
 import os
-from libs.crypto_utils import decrypt_value
+from .libs.crypto_utils import decrypt_value
 
 
 class SecretsManager(object):

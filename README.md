@@ -80,6 +80,7 @@ a
 - Reviewed to be launched as module (aka unittest, venv, etc.). Required files added
 - Tests modified to work running it as module in the cli (-m)
 - Now can be launched as $>python -m secman ... (include the secman folder in the PYTHONPATH)
+- Fixes for upload to pypi.org and installation with pip done
 
 ## References
 [Pytest - Good Integration Practices](https://docs.pytest.org/en/7.1.x/explanation/goodpractices.html)
