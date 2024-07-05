@@ -82,6 +82,11 @@ a
 - Now can be launched as $>python -m secman ... (include the secman folder in the PYTHONPATH)
 - Fixes for upload to pypi.org and installation with pip done
 
+### stable-0.1.3
+- Reviewed all paths, absolute and relative imports, to have all tests working
+- Fixing issue with projec_secrets.py import
+- Tests updated
+
 ## References
 [Pytest - Good Integration Practices](https://docs.pytest.org/en/7.1.x/explanation/goodpractices.html)
 [VSCode - Pylance reports missing imports](https://stackoverflow.com/questions/71918703/visual-studio-code-pylance-report-missing-imports)

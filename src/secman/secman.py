@@ -328,37 +328,6 @@ def set_master_key(file_path, master_key_env):
                 file.write(line)
 
 
-# Function to encrypt a message
-# Function to decrypt a message
-# def encrypt_value(value, master_key):
-#    """
-#    Encrypt a value using the Fernet symmetric encryption algorithm
-#    """
-#    salt = os.urandom(16)  # A random salt for key derivation
-#    key = hashlib.pbkdf2_hmac("sha256", master_key.encode(), salt, 100000, dklen=32)
-#    fernet = Fernet(base64.urlsafe_b64encode(key))
-#    encrypted_value = fernet.encrypt(value.encode()).decode()
-#    return encrypted_value
-
-# from passlib.hash import sha256_crypt
-#
-# def encrypt_value(value, master_key):
-#    """
-#    Encrypt a value using the symmetric encryption algorithm from passlib
-#    """
-#    encrypted_value = sha256_crypt.using(rounds=100000, salt_size=16).hash(value + master_key)
-#    return encrypted_value
-#
-# def decrypt_value(value, master_key):
-#    """
-#    Decrypt a value using the Fernet symmetric encryption algorithm
-#    """
-#    fernet = Fernet(base64.urlsafe_b64encode(pbkdf2_sha256.hash(master_key.encode())))
-#    decrypted_value = fernet.decrypt(value.encode()).decode()
-#    return decrypted_value
-#
-
-
 def main():
     """
     Main function to handle command line arguments
@@ -413,7 +382,6 @@ def main():
     )
 
     args = parser.parse_args()
-    psecrets = load_config_file("psecret", args.file)
 
     if args.master_key_env:
         set_master_key(args.file, args.master_key_env)
@@ -422,6 +390,7 @@ def main():
     elif args.list:
         list_secrets(args.file)
     elif args.encrypt:
+        psecrets = load_config_file("psecret", args.file)
         master_key = get_master_key(psecrets.MASTER_KEY_ENV)
         print("Encrypting secrets ...")
         print("NOTE: Empty string as secrets are not encrypted.")
@@ -430,11 +399,13 @@ def main():
         )
         print(f"Done. {n} secrets encrypted.")
     elif args.decrypt:
+        psecrets = load_config_file("psecret", args.file)
         master_key = get_master_key(psecrets.MASTER_KEY_ENV)
         decrypt_secrets(
             args.file, psecrets.MASTER_KEY_ENV, master_key, overwrite=args.overwrite
         )
     elif args.convert:
+        psecrets = load_config_file("psecret", args.file)
         master_key = get_master_key(psecrets.MASTER_KEY_ENV)
         convert_secrets(args.file, args.convert[0], args.convert[1])
     else:
