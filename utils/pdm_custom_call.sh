@@ -12,8 +12,8 @@ pdm() {
     
     # Attempt to fetch the PDM virtual environment activation command.
     local activation_command
-    activation_command=$(pdm venv activate 2> /dev/null)
-    
+    activation_command=$(pdm venv activate 2> /dev/null | tail -n 1)
+
     if [[ -z "$activation_command" ]]; then
       echo "No PDM virtual environment found. Please ensure a virtual environment is created."
       return 1
