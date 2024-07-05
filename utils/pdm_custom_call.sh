@@ -19,8 +19,12 @@ pdm() {
       return 1
     fi
 
+    # Remove any leading "source " or ". " from the activation command
+    activation_command=${activation_command#source }
+    activation_command=${activation_command#. }
+
     # Activate the virtual environment
-    eval "$activation_command"
+    eval "source $activation_command"
 
     echo "PDM virtual environment activated."
     echo "Use command 'deactivate' to exit the virtual environment."
