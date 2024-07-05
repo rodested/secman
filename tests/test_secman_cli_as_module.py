@@ -36,31 +36,30 @@ logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 #   python -m unittest -b -v
 #   python -m pytest -v --log-cli-level=INFO
 
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
 
 class TestSecmanCLI(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         """Run ONLY ONCE before all tests are run"""
-        # Set the environment variable for the master key password
+        # 1. Set the environment variable for the master key password
         os.environ["MKEYPASSWD"] = "FQRDX23t2Gp0C_BlpgOLG6-uHLxxAN4P2bl4qrp4sBY="
         # Change the current working directory to src/secman to run the scripts:
         # os.chdir("src")  # This works, with no need of passing PYTHONPATH
+        #
+        # 2. Adapt the PYTHONPATH environment variable:
         # Copy the current environment variables:
         self.env = os.environ.copy()
         self.current_dir = os.getcwd()
-        # Adapt the PYTHONPATH environment variable:
-        if os.name == "nt":
-            # Construct the path to "src" directory correctly for the operating system
-            src_path = os.path.join(".", "src")
-            # Get the current PYTHONPATH from the environment, defaulting to an empty string if not set
-            current_pythonpath = self.env.get("PYTHONPATH", "")
-            # Use os.pathsep to get the correct separator for the operating system
-            # This ensures the correct separator is used when modifying PYTHONPATH
-            new_pythonpath = src_path + (os.pathsep + current_pythonpath if current_pythonpath else "")
-            # Update the PYTHONPATH in the environment
-            self.env["PYTHONPATH"] = new_pythonpath
-        else:
-            self.env["PYTHONPATH"] = "./src" + self.env.get("PYTHONPATH", "")
+        # Construct the path to "src" directory correctly for the operating system
+        src_path = os.path.join(".", "src")
+        # Get the current PYTHONPATH from the environment, defaulting to an empty string if not set
+        current_pythonpath = self.env.get("PYTHONPATH", "")
+        # Use os.pathsep to get the correct separator for the operating system
+        # This ensures the correct separator is used when modifying PYTHONPATH
+        new_pythonpath = src_path + (os.pathsep + current_pythonpath if current_pythonpath else "")
+        # Update the PYTHONPATH in the environment
+        self.env["PYTHONPATH"] = new_pythonpath
 
     @classmethod
     def tearDownClass(self):
@@ -101,7 +100,7 @@ class TestSecmanCLI(unittest.TestCase):
         # logging.info("\n")
         # logging.info(f"stdout: {result.stdout}")
         # logging.info("\n")
-        # Check if the help message is in the output:
+        #Check if the help message is in the output:
         self.assertEqual(result.returncode, 0)
         self.assertIn("usage:", result.stdout)
 
