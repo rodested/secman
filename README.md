@@ -58,7 +58,7 @@ $> pdm shell
 $> deactivate
 ... and now it is deactivated
 ```
-a
+
 
 ## Release Notes
 
