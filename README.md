@@ -231,7 +231,7 @@ For this, you can find the script **utils/change-author.sh**.
 4. Verify the changes with the next line:
    1. `$ git log --pretty=format:"%h - %an <%ae> - %cn <%ce> - %s"`
 5. Push the changes doing:
-   1. `$ git push --force --tags origin 'refs/heads/*`
+   1. `$ git push --force --tags origin 'refs/heads/*'`
 
 ## License
 
