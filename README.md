@@ -276,6 +276,9 @@ This project is licensed under the [MIT License](https://github.com/rodested/sec
 
 ## Links of Interest
 
+- [PYPI - Test](https://test.pypi.org/project/secman/)
+- [PYPI - Prod](https://pypi.org/project/secman/)
+- [GitHub - secman](https://github.com/rodested/secman)
 - [Pytest - Good Integration Practices](https://docs.pytest.org/en/7.1.x/explanation/goodpractices.html)
 - [VSCode - Pylance reports missing imports](https://stackoverflow.com/questions/71918703/visual-studio-code-pylance-report-missing-imports)
 - [VSCode - Error debugging Tests: Found duplicate in env PATH](https://stackoverflow.com/questions/76036074/cannot-debug-test-case-in-vs-code-found-duplicate-in-env-path)
