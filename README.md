@@ -194,6 +194,23 @@ Example for BASH:
 $> PYTHONPATH="./src" python -m secman -h
 ```
 
+### Run tests when coding on secman
+
+So, you're coding on secman and want to test what you're doing.
+
+In this case you want to import the secman module or modules within the package which you're
+working on, either because they are not included in your python interpreter, or just want to
+use this ones instead of the included ones.
+
+You can run them in this way:
+```shell
+$> PYTHONPATH="./src" python -m unittest
+```
+
+```shell
+$> PYTHONPATH="./src" python -m pytest
+```
+
 ### Using PDM as python project manager
 
 PDM allows you to manage the python dependencies and create custom python virtual environments
