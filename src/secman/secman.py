@@ -12,6 +12,7 @@ Command line arguments:
     -k, --key: provides you a valid encryption key (valid Fernet key)
     -m, --master: Set the MASTER key value (env var name)
     -c, --convert: Convert secrets in a file to a different MASTER key
+    -x, --example: Create a secrets file example
 
 Overview:
     Main functionality:
@@ -84,6 +85,7 @@ Date: 2024-06-26
 # TODO: Implement the convert_secrets function
 # TODO: Implement the verification of the signature when converting secrets
 # TODO: Test the option "justMyCode" in the VSCode launch.json debug configurations, and apply to all the debug options
+# TODO: move the name "project_secrets.py" to a constant in an external file (config.py or similar)
 
 
 import importlib.util
@@ -112,6 +114,18 @@ HEADER = """
 #    lines not processed by secman.py will be those starting with "#"
 #    or empty lines
 #
+"""
+
+CONTENT_EXAMPLE = """
+
+# MASTER_KEY_ENV holds the name of the environment variable which holds the master key
+# You can set this value per project if needed, but you can safely keep it as is
+MASTER_KEY_ENV = "MKEYPASSWD"
+
+# Example secrets. You can add as many secrets as you need to cypher
+AAA = "hello"
+BBB = "bye"
+CCC = "secret"
 """
 
 
@@ -328,6 +342,22 @@ def set_master_key(file_path, master_key_env):
                 file.write(line)
 
 
+def create_example_file(file_path):
+    """
+    Create an example secrets file
+
+    If the file already exists, raises an error and
+    does not overwrite it
+    """
+    if os.path.exists(file_path):
+        raise FileExistsError(f"File {file_path} already exists. We do not overwrite it.")
+
+    with open(file_path, "w") as file:
+        file.write(HEADER_DISCLAIMER)
+        file.write(HEADER)
+        file.write(CONTENT_EXAMPLE)
+
+
 def main():
     """
     Main function to handle command line arguments
@@ -380,6 +410,12 @@ def main():
         action="store_true",
         help="Write the output in the same file as input (overwriting existing content)",
     )
+    parser.add_argument(
+        "-x",
+        "--example",
+        action="store_true",
+        help="Create a secrets file example",
+    )
 
     args = parser.parse_args()
 
@@ -408,6 +444,8 @@ def main():
         psecrets = load_config_file("psecret", args.file)
         master_key = get_master_key(psecrets.MASTER_KEY_ENV)
         convert_secrets(args.file, args.convert[0], args.convert[1])
+    elif args.example:
+        create_example_file(args.file)
     else:
         parser.print_help()
 
