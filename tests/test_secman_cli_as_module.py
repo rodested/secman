@@ -39,7 +39,11 @@ logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
 
-class TestSecmanCLI(unittest.TestCase):
+class TestSecmanCLISetter(unittest.TestCase):
+    """
+    Class which includes the environment set up for the tests
+    Subclass from this class to build the specific CLI tests
+    """
     @classmethod
     def setUpClass(self):
         """Run ONLY ONCE before all tests are run"""
@@ -64,6 +68,8 @@ class TestSecmanCLI(unittest.TestCase):
         # Update the PYTHONPATH in the environment
         self.env["PYTHONPATH"] = new_pythonpath
 
+
+class TestSecmanCLI(TestSecmanCLISetter):
     @classmethod
     def tearDownClass(self):
         """Run after all tests are run
@@ -378,33 +384,14 @@ class TestSecmanCLI(unittest.TestCase):
             self.assertEqual(bool(variable_names[0][key]), bool(variable_names[1][key]))
 
 
-class TestSecmanCLIExamples(unittest.TestCase):
-    @classmethod
-    def setUpClass(self):
-        """Run ONLY ONCE before all tests are run"""
-        # 1. Set the environment variable for the master key password
-        os.environ["MKEYPASSWD"] = "FQRDX23t2Gp0C_BlpgOLG6-uHLxxAN4P2bl4qrp4sBY="
-        # Change the current working directory to src/secman to run the scripts:
-        # os.chdir("src")  # This works, with no need of passing PYTHONPATH
-        #
-        # 2. Adapt the PYTHONPATH environment variable:
-        # Copy the current environment variables:
-        self.env = os.environ.copy()
-        self.current_dir = os.getcwd()
-        # Construct the path to "src" directory correctly for the operating system
-        src_path = os.path.join(".", "src")
-        # Get the current PYTHONPATH from the environment, defaulting to an empty string if not set
-        current_pythonpath = self.env.get("PYTHONPATH", "")
-        # Use os.pathsep to get the correct separator for the operating system
-        # This ensures the correct separator is used when modifying PYTHONPATH
-        new_pythonpath = src_path + (
-            os.pathsep + current_pythonpath if current_pythonpath else ""
-        )
-        # Update the PYTHONPATH in the environment
-        self.env["PYTHONPATH"] = new_pythonpath
-
+class TestSecmanCLIExamples(TestSecmanCLISetter):
     def tearDown(self):
-        """Run after each test is run"""
+        """Run after each test is run
+
+        Eventually, deleting the files after each test has proven
+        to be necessary to avoid conflicts between tests, as the
+        underlying OS (windows) was not releasing the files
+        """
         # Remove the output files:
         os.chdir(self.current_dir)
         output_files = [
