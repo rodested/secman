@@ -378,5 +378,158 @@ class TestSecmanCLI(unittest.TestCase):
             self.assertEqual(bool(variable_names[0][key]), bool(variable_names[1][key]))
 
 
+class TestSecmanCLIExamples(unittest.TestCase):
+    @classmethod
+    def setUpClass(self):
+        """Run ONLY ONCE before all tests are run"""
+        # 1. Set the environment variable for the master key password
+        os.environ["MKEYPASSWD"] = "FQRDX23t2Gp0C_BlpgOLG6-uHLxxAN4P2bl4qrp4sBY="
+        # Change the current working directory to src/secman to run the scripts:
+        # os.chdir("src")  # This works, with no need of passing PYTHONPATH
+        #
+        # 2. Adapt the PYTHONPATH environment variable:
+        # Copy the current environment variables:
+        self.env = os.environ.copy()
+        self.current_dir = os.getcwd()
+        # Construct the path to "src" directory correctly for the operating system
+        src_path = os.path.join(".", "src")
+        # Get the current PYTHONPATH from the environment, defaulting to an empty string if not set
+        current_pythonpath = self.env.get("PYTHONPATH", "")
+        # Use os.pathsep to get the correct separator for the operating system
+        # This ensures the correct separator is used when modifying PYTHONPATH
+        new_pythonpath = src_path + (
+            os.pathsep + current_pythonpath if current_pythonpath else ""
+        )
+        # Update the PYTHONPATH in the environment
+        self.env["PYTHONPATH"] = new_pythonpath
+
+    def tearDown(self):
+        """Run after each test is run"""
+        # Remove the output files:
+        os.chdir(self.current_dir)
+        output_files = [
+            "tests/output/existing_secrets.py",
+            "tests/output/new_secrets.py",
+            "tests/output/project_secrets.py",
+        ]
+        for file in output_files:
+            if Path(file).exists():
+                Path(file).unlink()
+
+    def test_example_with_existing_file(self):
+        """
+        Test 04:
+        Try to create an example project_secrets.py file, but the file
+        already exists.
+        Should return an error and do not overwrite the existing file.
+        """
+        os.chdir(self.current_dir)
+        # Create a dummy file to simulate an existing file
+        existing_file = "tests/output/existing_secrets.py"
+        with open(existing_file, "w") as f:
+            f.write("This is an existing file")
+
+        # Run the secman.py script to export secrets
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "secman",
+                "-x",
+                "-f",
+                existing_file,
+            ],
+            capture_output=True,
+            text=True,
+            env=self.env,
+        )
+        # Check if the export failed and returned 1
+        self.assertEqual(result.returncode, 1)
+        # Check if the existing file was not overwritten and still contains the original content
+        with open(existing_file, "r") as f:
+            self.assertEqual(f.read(), "This is an existing file")
+
+    def test_example_with_new_file(self):
+        """
+        Test 05:
+        Creating an example project_secrets.py file
+        Before creating the new file, ensure that the file to be created does not exist,
+        and delete it if it does
+        Ensure that the file is created and contains the expected content
+        """
+        # Delete the output file if it exists
+        new_file = Path("tests/output/new_secrets.py")
+        if new_file.exists():
+            new_file.unlink()
+        if os.path.exists(new_file):
+            os.remove(new_file)
+
+        # Run the secman.py script to export secrets
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "secman",
+                "-x",
+                "-f",
+                new_file,
+            ],
+            capture_output=True,
+            text=True,
+            env=self.env,
+        )
+
+        # Check if the export was successful and the file was generated
+        self.assertEqual(result.returncode, 0)
+        self.assertTrue(os.path.exists(new_file))
+        # Check if the file contains the expected content,
+        # just by checking if the MASTER_KEY_ENV is present
+        with open(new_file, "r") as f:
+            self.assertIn("MASTER_KEY_ENV", f.read())
+
+    def test_example_with_default_file(self):
+        """
+        Test 06:
+        Creating an example project_secrets.py file without providing the "-f" parameter
+        Ensure that the default file is created and contains the expected content
+        """
+        # Change the current working directory to output to create the default file there
+        output_dir = Path("tests/output")
+        os.chdir(output_dir)
+        # Delete the default file if it exists
+        default_file = "project_secrets.py"
+        if os.path.exists(default_file):
+            os.remove(default_file)
+
+        env = os.environ.copy()
+        self.current_dir = os.getcwd()
+        # Construct the path to "src" directory correctly for the operating system
+        src_path = os.path.join("..", "..", "src")
+        # Get the current PYTHONPATH from the environment, defaulting to an empty string if not set
+        current_pythonpath = env.get("PYTHONPATH", "")
+        # Use os.pathsep to get the correct separator for the operating system
+        # This ensures the correct separator is used when modifying PYTHONPATH
+        new_pythonpath = src_path + (
+            os.pathsep + current_pythonpath if current_pythonpath else ""
+        )
+        # Update the PYTHONPATH in the environment
+        env["PYTHONPATH"] = new_pythonpath
+
+        # Run the secman.py script to export secrets without providing the "-f" parameter
+        result = subprocess.run(
+            [sys.executable, "-m", "secman", "-x"],
+            capture_output=True,
+            text=True,
+            env=env,
+        )
+        # Check if the export was successful and the default file was generated
+        self.assertEqual(result.returncode, 0)
+        self.assertTrue(os.path.exists(default_file))
+        # Check if the default file contains the expected content,
+        # just by checking if the MASTER_KEY_ENV is present
+        with open(default_file, "r") as f:
+            self.assertIn("MASTER_KEY_ENV", f.read())
+
+
 if __name__ == "__main__":
     unittest.main()
