@@ -3,7 +3,7 @@ README.MD
 # secman
 
 [![PyPI version](https://badge.fury.io/py/secman.svg)](https://badge.fury.io/py/secman)
-[![Tests](https://github.com/username/project-name/actions/workflows/tests.yml/badge.svg)](https://github.com/username/project-name/actions/workflows/tests.yml)
+[![Tests](https://github.com/rodested/secman/actions/workflows/tests.yml/badge.svg)](https://github.com/rodested/secman/actions/workflows/tests.yml)
 
 This is **secman**, a practical and easy to use **sec**rets **man**ager for your python projects.
 
